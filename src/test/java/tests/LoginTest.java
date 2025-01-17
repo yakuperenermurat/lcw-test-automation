@@ -19,12 +19,9 @@ public class LoginTest extends BaseTest {
     @Description("Geçerli email ve şifre ile giriş yapma testi")
     public void validLoginTest() {
         // Sayfa nesnesi oluşturuluyor
-        LoginPage loginPage = new LoginPage(com.yakuperenermurat.utils.DriverManager.getDriver());
+        LoginPage loginPage = new LoginPage(driver);
 
         // Test adımları
-        loginPage.clickHomeLoginButton();
-        loginPage.enterEmail("test@example.com");
-        loginPage.enterPassword("password123");
-        loginPage.clickLoginButton();
+        loginPage.loginSteps("test@example.com", "password123");
     }
 }

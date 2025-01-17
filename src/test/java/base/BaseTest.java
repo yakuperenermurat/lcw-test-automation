@@ -11,12 +11,16 @@ import java.time.Duration;
  */
 public class BaseTest {
 
+    // driver değişkenini protected yaparak miras alan sınıfların erişmesini sağlıyoruz.
+    protected WebDriver driver;
+
     /**
      * Test öncesi tarayıcı başlatma ve ayarları yükleme.
      */
     @BeforeMethod
     public void setup() {
-        WebDriver driver = DriverManager.getDriver();
+        driver = DriverManager.getDriver();
+        driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)); // Sayfa yüklenmesi için bekleme süresi
         driver.get("https://www.lcw.com/"); // Test edilecek sayfaya yönlendirme
     }

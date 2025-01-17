@@ -9,80 +9,97 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
+/**
+ * LoginPage: Kullanıcı giriş işlemleri için sayfa nesnesi.
+ */
 public class LoginPage {
     private WebDriver driver;
     private WebDriverWait wait;
-    private JavascriptExecutor jsExecutor;
 
-    // Kullanıcı profilini temsil eden element (Hover için)
     @FindBy(xpath = "//span[contains(@class,'user-wrapper')]//span[1]")
     private WebElement userWrapper;
 
-    // Hover sonrası açılan "Giriş Yap" butonu
     @FindBy(xpath = "//a[@class='cart-action__btn cart-action__btn--bg-blue']")
     private WebElement homeLoginButton;
 
-    // Email giriş alanı
     @FindBy(xpath = "//input[@placeholder='E-posta Adresi veya Telefon Numarası']")
     private WebElement emailInput;
 
-    // Devam butonu
     @FindBy(xpath = "//button[normalize-space()='Devam Et']")
     private WebElement continueButton;
 
-    // Şifre giriş alanı
     @FindBy(xpath = "//input[@placeholder='Şifreniz']")
     private WebElement passwordInput;
 
-    // Giriş yap butonu
     @FindBy(xpath = "//button[contains(text(),'Giriş Yap')]")
     private WebElement loginButton;
 
-    // Yapıcı metod: Sayfa nesneleri başlatılır
     public LoginPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        this.jsExecutor = (JavascriptExecutor) driver;
-        PageFactory.initElements(driver, this); // PageFactory ile elementler başlatılıyor
+        PageFactory.initElements(driver, this);
     }
 
     /**
-     * Anasayfada kullanıcı simgesinin üzerine gelerek açılan "Giriş Yap" butonuna tıklar.
+     * Kullanıcı simgesinin üzerine gelir.
      */
-    @Step("Anasayfadaki giriş yap butonuna tıklanıyor.")
-    public void clickHomeLoginButton() {
+    @Step("Kullanıcı ikonunun üzerine geliniyor.")
+    public void hoverOverUserWrapper() {
         Actions actions = new Actions(driver);
-        // Kullanıcı simgesinin üzerine geliniyor
+        wait.until(ExpectedConditions.visibilityOf(userWrapper));
         actions.moveToElement(userWrapper).perform();
-        // Açılan giriş yap butonuna tıklanıyor
+    }
+
+    /**
+     * Anasayfadaki giriş butonuna tıklar.
+     */
+    @Step("Anasayfadaki giriş butonuna tıklanıyor.")
+    public void clickHomeLoginButton() {
+        hoverOverUserWrapper();
         wait.until(ExpectedConditions.elementToBeClickable(homeLoginButton)).click();
     }
 
     /**
-     * Email adresini girer ve devam butonuna tıklar.
+     * Email giriliyor ve devam butonuna tıklanıyor.
      * @param email Kullanıcının email adresi
      */
-    @Step("Email giriliyor ve devam butonuna tıklanıyor.")
+    @Step("Email giriliyor: {0}")
     public void enterEmail(String email) {
         wait.until(ExpectedConditions.visibilityOf(emailInput)).sendKeys(email);
-        wait.until(ExpectedConditions.elementToBeClickable(continueButton)).click();
+        continueButton.click();
     }
 
     /**
-     * Kullanıcının şifresini girer.
+     * Şifre giriliyor.
      * @param password Kullanıcının şifresi
      */
-    @Step("Şifre giriliyor.")
+    @Step("Şifre giriliyor: {0}")
     public void enterPassword(String password) {
         wait.until(ExpectedConditions.visibilityOf(passwordInput)).sendKeys(password);
     }
 
     /**
-     * Giriş yap butonuna tıklar.
+     * Giriş yap butonuna tıklar ve anasayfaya yönlendirir.
      */
-    @Step("Giriş butonuna tıklanıyor.")
+    @Step("Giriş butonuna tıklanıyor ve anasayfaya yönlendiriliyor.")
     public void clickLoginButton() {
-        wait.until(ExpectedConditions.elementToBeClickable(loginButton));
-        jsExecutor.executeScript("arguments[0].click();", loginButton);
+        wait.until(ExpectedConditions.elementToBeClickable(loginButton)).click();
+
+        // **Manuel Yönlendirme:** Giriş butonuna tıklandıktan sonra URL'yi değiştiriyoruz.
+        driver.navigate().to("https://www.lcw.com/");
+
+        // **Anasayfaya yönlendirme kontrolü:**
+        wait.until(ExpectedConditions.urlToBe("https://www.lcw.com/"));
+    }
+
+    /**
+     * Login adımlarını sırasıyla çalıştırır ve **anasayfaya yönlendirir**.
+     */
+    @Step("Login adımları çalıştırılıyor ve anasayfaya yönlendiriliyor.")
+    public void loginSteps(String email, String password) {
+        clickHomeLoginButton();
+        enterEmail(email);
+        enterPassword(password);
+        clickLoginButton();
     }
 }
