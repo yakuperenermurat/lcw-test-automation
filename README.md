@@ -42,7 +42,12 @@ Otomatik testler ile:
 | **9** | 💳 **Ödeme Adımına Geçiş Testi** | Sepetten ödeme adımına başarıyla geçişi test eder. |
 
 ---
+## 🚀 Projenin Loom Linki
+  https://www.loom.com/share/b0c46e5f358c41149246cc4da1a682d6?sid=8598c415-dc96-4e09-8547-7632c5c55982
+---
+### 📽️ Test Senaryosu Çalışırken:
 
+---
 ## 📦 Proje Kurulumu
 
 ### 1️⃣ Maven ile Bağımlılıkları İndir
