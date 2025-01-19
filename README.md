@@ -46,7 +46,7 @@ Otomatik testler ile:
   https://www.loom.com/share/b0c46e5f358c41149246cc4da1a682d6?sid=8598c415-dc96-4e09-8547-7632c5c55982
 ---
 ### 📽️ Test Senaryosu Çalışırken:
-
+![Proje Tanıtımı](https://github.com/yakuperenermurat/lcw-test-automation/blob/main/projeTanitimi.gif?raw=true)
 ---
 ## 📦 Proje Kurulumu
 
