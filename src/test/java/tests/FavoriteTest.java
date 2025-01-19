@@ -57,17 +57,16 @@ public class FavoriteTest extends BaseTest {
         Assert.assertTrue(isQuantityCorrect, "❌ Ürün adedi eşleşmiyor!");
         Assert.assertTrue(isPriceCorrect, "❌ Sepet fiyatları eşleşmiyor!");
 
-        // Ürün adedini artır ve doğrula
+        // **Ürün adedini artır ve doğrula**
         cartPage.increaseProductQuantity();
         Assert.assertTrue(cartPage.verifyProductQuantity("2"), "❌ Ürün adedi artırılamadı!");
 
-        // Ürün adedini azalt ve doğrula
+        // **Ürün adedini azalt ve doğrula**
         cartPage.decreaseProductQuantity();
         Assert.assertTrue(cartPage.verifyProductQuantity("1"), "❌ Ürün adedi azaltılamadı!");
 
         // 🛍 **Sepetteki ürün adını al ve kaydet**
         String productNameInCart = cartPage.getProductNameFromCart();
-        System.out.println("🛍 Sepetteki Ürün Adı (Favoriye eklemeden önce kaydedildi): " + productNameInCart);
 
         // ✅ Ürünü favorilere ekle ve doğrula
         cartPage.addToFavorites();

@@ -67,7 +67,6 @@ public class CheckoutTest extends BaseTest {
 
         // 🛍 **Sepetteki ürün adını al ve kaydet**
         String productNameInCart = cartPage.getProductNameFromCart();
-        System.out.println("🛍 Sepetteki Ürün Adı (Favoriye eklemeden önce kaydedildi): " + productNameInCart);
 
         // ✅ Ürünü favorilere ekle ve doğrula
         cartPage.addToFavorites();

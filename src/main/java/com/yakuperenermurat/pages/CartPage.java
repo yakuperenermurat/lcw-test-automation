@@ -55,23 +55,10 @@ public class CartPage {
             // 1️⃣ Sepetteki ürün rengini al
             WebElement productColorElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//strong[normalize-space()='Bej']")));
             String productColor = productColorElement.getText().trim();
-            System.out.println("🎨 Sepetteki Ürün Rengi: " + productColor);
 
-            // 2️⃣ Ürün detay sayfasındaki ürün başlığını al
+            // 2️⃣ Küçük harfe çevirerek karşılaştır
 
-            System.out.println("🛍 Ürün Detay Sayfası Başlık: " + expectedProductName);
-
-            // 3️⃣ Küçük harfe çevirerek karşılaştır
             boolean isColorInTitle = expectedProductName.toLowerCase().contains(productColor.toLowerCase());
-
-            if (!isColorInTitle) {
-                System.out.println("❌ Hata: Ürün adı içinde renk bilgisi eşleşmiyor!");
-                System.out.println("🔍 Karşılaştırılan Değerler:");
-                System.out.println("   - 🛍 Ürün Adı: " + expectedProductName);
-                System.out.println("   - 🎨 Sepetteki Renk: " + productColor);
-            } else {
-                System.out.println("✅ Başarılı: Ürün adı içinde renk bilgisi doğrulandı! (" + productColor + ")");
-            }
 
             return isColorInTitle;
         } catch (TimeoutException e) {
@@ -104,12 +91,6 @@ public class CartPage {
             // Fiyatlar eşleşiyor mu?
             boolean isPriceMatching = productPrice.equals(totalPrice);
 
-            if (!isPriceMatching) {
-                System.out.println("❌ Hata: Sepetteki fiyat (" + productPrice + ") ile ödeme adımındaki fiyat (" + totalPrice + ") uyuşmuyor!");
-            } else {
-                System.out.println("✅ Başarılı: Fiyat doğrulandı! (" + productPrice + ")");
-            }
-
             return isPriceMatching;
         } catch (TimeoutException e) {
             System.out.println("❌ Hata: Fiyat doğrulaması zaman aşımına uğradı!");
@@ -124,11 +105,20 @@ public class CartPage {
     public void increaseProductQuantity() {
         try {
             WebElement increaseBtn = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(@id,'Cart_AddQuantity')]")));
+
+            // Tıklamadan önce mevcut değeri al
+            String initialQuantity = getProductQuantity();
+
+            // Butona tıkla
             wait.until(ExpectedConditions.elementToBeClickable(increaseBtn)).click();
-            wait.until(ExpectedConditions.attributeToBe(productQuantityInCart, "value", "2"));
-            System.out.println("✅ Ürün adedi artırıldı!");
+
+            // Bekleme mekanizması (mevcut değer değişene kadar bekle)
+            wait.until(driver -> !getProductQuantity().equals(initialQuantity));
+
         } catch (TimeoutException e) {
             System.out.println("❌ Hata: Ürün adedi artırma butonu bulunamadı! XPath yanlış olabilir veya buton görünmüyor.");
+        } catch (StaleElementReferenceException e) {
+            System.out.println("❌ Hata: StaleElementReferenceException - Sayfa yeniden yüklendi veya element kayboldu.");
         }
     }
 
@@ -136,12 +126,31 @@ public class CartPage {
     public void decreaseProductQuantity() {
         try {
             WebElement decreaseBtn = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(@id,'Cart_RemoveQuantity')]")));
-            wait.until(ExpectedConditions.elementToBeClickable(decreaseBtn)).click();
-            wait.until(ExpectedConditions.attributeToBe(productQuantityInCart, "value", "1"));
-            System.out.println("✅ Ürün adedi azaltıldı!");
 
+            // Tıklamadan önce mevcut değeri al
+            String initialQuantity = getProductQuantity();
+
+            // Butona tıkla
+            wait.until(ExpectedConditions.elementToBeClickable(decreaseBtn)).click();
+
+            // Bekleme mekanizması (mevcut değer değişene kadar bekle)
+            wait.until(driver -> !getProductQuantity().equals(initialQuantity));
         } catch (TimeoutException e) {
             System.out.println("❌ Hata: Ürün adedi azaltma butonu bulunamadı! XPath yanlış olabilir veya buton görünmüyor.");
+        } catch (StaleElementReferenceException e) {
+            System.out.println("❌ Hata: StaleElementReferenceException - Sayfa yeniden yüklendi veya element kayboldu.");
+        }
+    }
+
+    @Step("Sepetteki mevcut ürün adedi alınıyor.")
+    public String getProductQuantity() {
+        try {
+            WebElement element = wait.until(ExpectedConditions.visibilityOf(productQuantityInCart));
+            return element.getAttribute("value").trim();
+        } catch (StaleElementReferenceException e) {
+            System.out.println("❌ Hata: StaleElementReferenceException - Element değişti, tekrar bulmayı deniyoruz...");
+            WebElement element = wait.until(ExpectedConditions.refreshed(ExpectedConditions.visibilityOf(productQuantityInCart)));
+            return element.getAttribute("value").trim();
         }
     }
 
@@ -157,8 +166,6 @@ public class CartPage {
             // Favori butonunun tıklanabilir olmasını bekle
             WebElement favButton = wait.until(ExpectedConditions.elementToBeClickable(favoriteIcon));
             favButton.click();
-            System.out.println("💖 Favori butonuna tıklandı!");
-
             // Favoriye ekleme işlemini doğrulamak için bekleyelim
             Thread.sleep(3000);
 
@@ -178,17 +185,14 @@ public class CartPage {
             Thread.sleep(3000);
             // 2️⃣ Favoriler sayfasına git
             WebElement favoritesBtn = wait.until(ExpectedConditions.elementToBeClickable(goToFavoritesButton));
-            System.out.println("💖 Favorilere gidiliyor...");
             favoritesBtn.click();
 
             // 3️⃣ **Favoriler sayfasının tamamen yüklenmesini bekle**
             wait.until(ExpectedConditions.titleIs("Favorilerim | LCW"));
-            System.out.println("✅ Favoriler sayfası başarıyla ");
 
             // 4️⃣ **Favorilerdeki ürün başlığını alalım**
             WebElement favProductElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h5[contains(text(),'Kapüşonlu Kız Çocuk Kaban')]")));
             String favProductName = favProductElement.getText().trim();
-            System.out.println("💖 Favorilerde Bulunan Ürün Adı: " + favProductName);
 
             // 5️⃣ **Sepetteki ürün adını normalize edelim**
             String cartProductNameNormalized = cartProductName.replaceAll("\\s+", " ").toLowerCase();
@@ -196,12 +200,7 @@ public class CartPage {
 
             // 6️⃣ **Karşılaştırma**
             boolean isMatching = favProductNameNormalized.contains(cartProductNameNormalized);
-            if (isMatching) {
-                System.out.println("✅ Favorilere eklenen ürün, sepetteki ürünle eşleşiyor!");
-                Thread.sleep(2000);
-            } else {
-                System.out.println("❌ Hata: Favorilerdeki ürün adı sepetteki ürünle eşleşmiyor!");
-            }
+            Thread.sleep(2000);
 
             return isMatching;
         }
