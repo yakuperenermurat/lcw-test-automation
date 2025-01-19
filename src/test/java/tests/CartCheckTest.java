@@ -35,7 +35,6 @@ public class CartCheckTest extends BaseTest {
 
         // Ürünün detay sayfasındaki bilgileri al
         String selectedProductName = productPage.getSelectedProductName();
-        String selectedProductColor = productPage.getSelectedProductColor();
         String selectedProductQuantity = "1";
 
         // Sepete ekleme sonrası bekleme
@@ -47,9 +46,10 @@ public class CartCheckTest extends BaseTest {
 
         // Doğrulamalar
         boolean isNameCorrect = cartPage.verifyProductName(selectedProductName);
-        boolean isColorCorrect = cartPage.verifyProductColor(selectedProductColor);
         boolean isQuantityCorrect = cartPage.verifyProductQuantity(selectedProductQuantity);
         boolean isPriceCorrect = cartPage.verifyPrices();
+        boolean isColorCorrect = cartPage.verifyProductColor(selectedProductName);
+
 
         // Test sonuçlarını doğrula
         Assert.assertTrue(isNameCorrect, "❌ Ürün adı eşleşmiyor!");

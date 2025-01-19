@@ -17,20 +17,23 @@ public class ProductSelectionPage {
     @FindBy(xpath = "//div[@class='product-grid']/div[4]") // 4. ürünü seçiyoruz.
     private WebElement fourthProduct;
 
-    @FindBy(xpath = "//h1[@class='product-title']") // Ürün adı (Detay sayfasında)
+    @FindBy(xpath = "//h1[@class='product-title']")
     private WebElement productTitle;
 
-    @FindBy(xpath = "//label[contains(text(), 'Bej') or contains(text(), 'Renk')]") // Ürün rengi (Dinamik XPath)
+    @FindBy(xpath = "//label[contains(text(), 'Bej') or contains(text(), 'Renk')]")
     private WebElement productColor;
 
-    @FindBy(xpath = "//button[contains(text(),'SEPETE EKLE')]") // Sepete ekle butonu
+    @FindBy(xpath = "//button[contains(text(),'SEPETE EKLE')]")
     private WebElement addToCartButton;
 
-    @FindBy(xpath = "//button[contains(text(),'Yaş') and not(contains(@class,'disabled'))]") // Stokta olan beden butonlarını seçiyoruz.
+    @FindBy(xpath = "//button[contains(text(),'Yaş') and not(contains(@class,'disabled'))]")
     private List<WebElement> availableSizes;
 
-    @FindBy(xpath = "//span[normalize-space()='Sepetim']/following-sibling::span") // Sepet butonundaki ürün sayısı
+    @FindBy(xpath = "//span[normalize-space()='Sepetim']/following-sibling::span")
     private WebElement cartItemCount;
+
+    @FindBy(xpath = "//div[contains(@class, 'evam-first-screenControl')]")
+    private List<WebElement> popups; // Popup'lar varsa yakalamak için
 
     public ProductSelectionPage(WebDriver driver) {
         this.driver = driver;
@@ -48,18 +51,33 @@ public class ProductSelectionPage {
     @Step("Ürün detay sayfasının tamamen yüklenmesi bekleniyor.")
     private void waitUntilProductDetailPageLoads() {
         wait.until(webDriver -> jsExecutor.executeScript("return document.readyState").equals("complete"));
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[contains(text(),'Yaş')]"))); // Beden butonları yüklendi mi?
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[contains(text(),'Yaş')]")));
+    }
+
+    @Step("Popup veya engelleyici elementleri kapatıyoruz.")
+    private void closePopupsIfExist() {
+        try {
+            if (!popups.isEmpty()) {
+                for (WebElement popup : popups) {
+                    jsExecutor.executeScript("arguments[0].style.display='none';", popup);
+                }
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     @Step("Stokta olan ilk uygun beden seçiliyor.")
     public void selectAvailableSize() {
-        waitUntilProductDetailPageLoads(); // Sayfanın tam yüklenmesini bekle
+        waitUntilProductDetailPageLoads();
+        closePopupsIfExist(); // Öncelikle engelleyici elementleri gizleyelim.
 
         availableSizes = driver.findElements(By.xpath("//button[contains(text(),'Yaş') and not(contains(@class,'disabled'))]"));
 
         if (!availableSizes.isEmpty()) {
             WebElement firstAvailableSize = availableSizes.get(0);
-            wait.until(ExpectedConditions.elementToBeClickable(firstAvailableSize)).click();
+            scrollToElement(firstAvailableSize); // Scroll yap
+            wait.until(ExpectedConditions.elementToBeClickable(firstAvailableSize));
+            clickWithJS(firstAvailableSize); // JavaScript ile tıkla
             waitForButtonToBeEnabled();
         } else {
             throw new NoSuchElementException("Stokta mevcut beden bulunamadı.");
@@ -74,10 +92,18 @@ public class ProductSelectionPage {
     @Step("Ürün sepete ekleniyor ve sepette 1 ürün olup olmadığı kontrol ediliyor.")
     public void addToCart() {
         waitForButtonToBeEnabled();
-        addToCartButton.click();
-
-        // Sepet butonundaki sayı 1 olana kadar bekle
+        clickWithJS(addToCartButton); // Sepete ekleme için JavaScript click kullan
         wait.until(ExpectedConditions.textToBePresentInElement(cartItemCount, "1"));
+    }
+
+    @Step("Elemente scroll yapılıyor.")
+    private void scrollToElement(WebElement element) {
+        jsExecutor.executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
+    }
+
+    @Step("Elemente JavaScript ile tıklanıyor.")
+    private void clickWithJS(WebElement element) {
+        jsExecutor.executeScript("arguments[0].click();", element);
     }
 
     @Step("Ürün adı alınıyor.")
